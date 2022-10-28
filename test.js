@@ -69,8 +69,9 @@ function get_event_info_from_html(html_text,serial) {
         info['description']=undefined;
         info['error report']=info['error report']+'_'+'found no description';
     }
-    change_html(info,serial)
-    return info;
+    info['image path']="https://events.vtools.ieee.org/event/picture/"+serial.toString(); //get image path to info
+    change_html(info,serial); //edit page element with info
+    return info; //return info because why not
   }
 
   httpGetAsync('https://events.vtools.ieee.org/events/search?utf8=✓&_sub=true&q=&ou={}&d=All&commit=Search', check_main_page);
