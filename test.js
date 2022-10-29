@@ -119,5 +119,6 @@ function get_event_info_from_html(html_text,serial,event_id) {
     change_html(info,serial); //edit page element with info
     return info; //return info because why not
   }
+
 let branch_name='STB50001+-+Univ+of+Patras'
 httpGetAsync('https://thawing-escarpment-34789.herokuapp.com/'+'https://events.vtools.ieee.org/events/search?utf8=✓&_sub=true&q=&ou='+branch_name+'&d=All&commit=Search', check_main_page);
