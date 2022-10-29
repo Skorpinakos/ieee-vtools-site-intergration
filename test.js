@@ -1,5 +1,12 @@
+function uniq(a) {
+    var seen = {};
+    return a.filter(function(item) {
+        return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+    });
+}
+
 function httpGetAsync(theUrl, callback){
-    console.log('got_to_send_req_for_search')
+    //console.log('got_to_send_req_for_search')
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() { 
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
@@ -10,7 +17,7 @@ function httpGetAsync(theUrl, callback){
 }
 
 function httpGetAsync_for_events(theUrl, callback,id){
-    console.log('got_to_send_reqs_for_events')
+    //console.log('got_to_send_reqs_for_events')
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() { 
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
@@ -20,16 +27,30 @@ function httpGetAsync_for_events(theUrl, callback,id){
     xmlHttp.send(null);
 }
 function check_main_page(html_text){
-    console.log('got_to_main_page')
-    let regex='href="/m/[0-9]*';
-    let links = html_text.match(regex);
-    let links_filtered= [...new Set(links)]; //remove duplicates
-    for (i=0;i<links_filtered.length;i++){
-        links_filtered[i]=links_filtered[i].replaceAll('href="/m/','')
+    let i=0;
+    //console.log('got_to_main_page')
+    let regex='href="/m/([0-9]*)';
+    let links_matches = [...html_text.matchAll(regex)];
+    let links=[]
+    for (i=0;i<links_matches.length;i++){
+        links.push(links_matches[i][0])
+
     }
-    console.log('found_those_event_ids')
-    console.log(links_filtered)
+    //console.log(links);
+    let links_uniq=uniq(links);
+    //console.log(links_uniq);
+    let links_filtered=[]
+    for (i=0;i<links_uniq.length;i++){
+        let temp=links_uniq[i];
+        temp=temp.replaceAll('href="/m/','');
+        links_filtered.push(temp);
+
+    }
+
+    //console.log('found_those_event_ids')
+    //console.log(links_filtered)
     for (i=0;i<links_filtered.length;i++){
+        //console.log(links_filtered[i])
         httpGetAsync_for_events('https://thawing-escarpment-34789.herokuapp.com/'+'https://events.vtools.ieee.org/m/'+links_filtered[i].toString(), get_event_info_from_html,i);
 
     }
@@ -66,7 +87,7 @@ function get_event_info_from_html(html_text,serial) {
         info['title']=undefined;
         info['error report']=info['error report']+'_'+'found no title';
     }
-    console.log(info['title'])
+    //console.log(info['title'])
 
     //console.log(html_text_string)
     // check for possible errors
@@ -74,7 +95,7 @@ function get_event_info_from_html(html_text,serial) {
         info['description']=description[0].replaceAll("\r\n<div>",'').replace('style="float:right; margin-left:10px; max-width: 50%;" /> 	  ','').replaceAll('<br style="clear:both;">','') //clear clutter
         if (info['description'].includes('<div' )){
             let cut_off=info['description'].indexOf('<div');
-            console.log(cut_off)
+            //console.log(cut_off)
             info['description']=info['description'].slice(0,cut_off); //slice clutter out
         }
     }
@@ -86,7 +107,7 @@ function get_event_info_from_html(html_text,serial) {
         info['description']=undefined;
         info['error report']=info['error report']+'_'+'found no description';
     }
-    console.log(info['description'])
+    //console.log(info['description'])
 
     info['image path']="https://events.vtools.ieee.org/event/picture/"+serial.toString(); //get image path to info
     change_html(info,serial); //edit page element with info
@@ -94,4 +115,3 @@ function get_event_info_from_html(html_text,serial) {
   }
 let branch_name='STB50001+-+Univ+of+Patras'
 httpGetAsync('https://thawing-escarpment-34789.herokuapp.com/'+'https://events.vtools.ieee.org/events/search?utf8=✓&_sub=true&q=&ou='+branch_name+'&d=All&commit=Search', check_main_page);
-//
