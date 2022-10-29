@@ -16,12 +16,12 @@ function httpGetAsync(theUrl, callback){
     xmlHttp.send(null);
 }
 
-function httpGetAsync_for_events(theUrl, callback,id){
+function httpGetAsync_for_events(theUrl, callback,id,event_id){
     //console.log('got_to_send_reqs_for_events')
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() { 
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-            callback(xmlHttp.responseText,id);
+            callback(xmlHttp.responseText,id,event_id);
     }
     xmlHttp.open("GET", theUrl, true); // true for asynchronous 
     xmlHttp.send(null);
@@ -51,18 +51,24 @@ function check_main_page(html_text){
     //console.log(links_filtered)
     for (i=0;i<links_filtered.length;i++){
         //console.log(links_filtered[i])
-        httpGetAsync_for_events('https://thawing-escarpment-34789.herokuapp.com/'+'https://events.vtools.ieee.org/m/'+links_filtered[i].toString(), get_event_info_from_html,i);
+        let event_id=links_filtered[i]
+        console.log(event_id)
+        httpGetAsync_for_events('https://thawing-escarpment-34789.herokuapp.com/'+'https://events.vtools.ieee.org/m/'+links_filtered[i].toString(), get_event_info_from_html,i,event_id);
 
     }
     return undefined;
 }
 
 function change_html(info,serial){
+    if (serial>9){
+        return //haven't figured that out for now
+    }
+    document.getElementById('event_'+serial.toString()).innerHTML = '<h1>'+info['title']+'</h1>'+'\n'+'<h3>Description:</h3>\n'+info['description']+'\n'+'<img class="event_image" style="width:50%;" src='+info['image path']+' alt="event media">\n\n\n\n\n';
     console.log('ok')
     return
 }
 
-function get_event_info_from_html(html_text,serial) {
+function get_event_info_from_html(html_text,serial,event_id) {
     html_text_string=html_text.replace(/\n/g, " "); //replaces \n for simplicity
     html_text_string=html_text_string.replace(/\r/g, " "); //replaces \r for simplicity
     html_text_string=html_text_string.replace(/\u2028/g, " "); //replaces \u2028 for simplicity
@@ -108,8 +114,8 @@ function get_event_info_from_html(html_text,serial) {
         info['error report']=info['error report']+'_'+'found no description';
     }
     //console.log(info['description'])
-
-    info['image path']="https://events.vtools.ieee.org/event/picture/"+serial.toString(); //get image path to info
+    //console.log(event_id)
+    info['image path']="https://events.vtools.ieee.org/event/picture/"+event_id; //get image path to info
     change_html(info,serial); //edit page element with info
     return info; //return info because why not
   }
